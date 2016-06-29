@@ -16,6 +16,7 @@ import rx.schedulers.Schedulers;
  */
 public class AllFragmentPresenterImpl extends BasePresenter<DataView> {
 
+    private final String Tag = "AllFragmentPresenterImpl";
     private Context context;
     private SearchEntity entity;
 
@@ -38,14 +39,10 @@ public class AllFragmentPresenterImpl extends BasePresenter<DataView> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<SearchEntity>() {
                                @Override
-                               public void onCompleted() {
-
-                               }
+                               public void onCompleted() { }
 
                                @Override
-                               public void onError(Throwable e) {
-
-                               }
+                               public void onError(Throwable e) { }
 
                                @Override
                                public void onNext(SearchEntity searchEntity) {

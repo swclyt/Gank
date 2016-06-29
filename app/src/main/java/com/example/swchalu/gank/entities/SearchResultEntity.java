@@ -10,6 +10,7 @@ public class SearchResultEntity extends Entity {
     private String type;
     private String url;
     private String who;
+    private String pic;
 
     public String getDesc() {
         return desc;
@@ -58,4 +59,8 @@ public class SearchResultEntity extends Entity {
     public void setWho(String who) {
         this.who = who;
     }
+
+    public String getPic() { return pic; }
+
+    public void setPic(String pic) { this.pic = pic; }
 }
