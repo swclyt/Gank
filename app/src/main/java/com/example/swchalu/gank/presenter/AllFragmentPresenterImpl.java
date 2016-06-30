@@ -2,6 +2,7 @@ package com.example.swchalu.gank.presenter;
 
 import android.content.Context;
 
+import com.example.swchalu.gank.Constants;
 import com.example.swchalu.gank.api.GankApi;
 import com.example.swchalu.gank.api.GankService;
 import com.example.swchalu.gank.entities.SearchEntity;
@@ -34,20 +35,22 @@ public class AllFragmentPresenterImpl extends BasePresenter<DataView> {
         super.detachView();
     }
 
-    public void loadData(int page) {
-        GankService.createApi(GankApi.class).getSearch("all", 10, 1).subscribeOn(Schedulers.io())
+    public void loadData(final int page) {
+        GankService.createApi(GankApi.class).getSearch("all", 10, page).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<SearchEntity>() {
                                @Override
-                               public void onCompleted() { }
+                               public void onCompleted() {
+                               }
 
                                @Override
-                               public void onError(Throwable e) { }
+                               public void onError(Throwable e) {
+                               }
 
                                @Override
                                public void onNext(SearchEntity searchEntity) {
                                    entity = searchEntity;
-                                   getmBaseView().loadData(entity);
+                                   getmBaseView().loadData(entity, page == 1 ? Constants.LOADING_TYPE_INIT : Constants.LOADING_TYPE_PAGE);
                                }
                            }
                 );

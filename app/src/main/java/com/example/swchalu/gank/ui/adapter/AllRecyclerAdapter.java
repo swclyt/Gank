@@ -18,6 +18,9 @@ import com.example.swchalu.gank.ui.activities.WebActivity;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by swchalu on 2016/6/28.
  */
@@ -57,6 +60,7 @@ public class AllRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void onClick(View view) {
                     Intent intent = new Intent(context, WebActivity.class);
                     intent.putExtra("url", items.get(position).getUrl());
+                    intent.putExtra("title", items.get(position).getDesc());
                     context.startActivity(intent);
                 }
             });
@@ -70,21 +74,22 @@ public class AllRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public class AllHolder extends RecyclerView.ViewHolder {
 
-        private TextView tv_desc;
-        private TextView tv_publishedAt;
-        private TextView tv_type;
-        private TextView tv_who;
-        private ImageView iv_show;
-        private LinearLayout ll_item;
+        @Bind(R.id.tv_desc)
+        TextView tv_desc;
+        @Bind(R.id.tv_publishedAt)
+        TextView tv_publishedAt;
+        @Bind(R.id.tv_type)
+        TextView tv_type;
+        @Bind(R.id.tv_who)
+        TextView tv_who;
+        @Bind(R.id.iv_show)
+        ImageView iv_show;
+        @Bind(R.id.ll_item)
+        LinearLayout ll_item;
 
         public AllHolder(View itemView) {
             super(itemView);
-            this.tv_desc = (TextView) itemView.findViewById(R.id.tv_desc);
-            this.tv_publishedAt = (TextView) itemView.findViewById(R.id.tv_publishedAt);
-            this.tv_type = (TextView) itemView.findViewById(R.id.tv_type);
-            this.tv_who = (TextView) itemView.findViewById(R.id.tv_who);
-            this.iv_show = (ImageView) itemView.findViewById(R.id.iv_show);
-            this.ll_item = (LinearLayout) itemView.findViewById(R.id.ll_item);
+            ButterKnife.bind(this, itemView);
         }
     }
 }

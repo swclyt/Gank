@@ -5,4 +5,6 @@ package com.example.swchalu.gank;
  */
 public class Constants {
     public static final String BASE_URL = "http://gank.io/api/";
+    public static final int LOADING_TYPE_INIT = 0;
+    public static final int LOADING_TYPE_PAGE = 1;
 }

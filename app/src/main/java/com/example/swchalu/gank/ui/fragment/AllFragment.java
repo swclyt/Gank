@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.swchalu.gank.Constants;
 import com.example.swchalu.gank.R;
 import com.example.swchalu.gank.entities.SearchEntity;
 import com.example.swchalu.gank.entities.SearchResultEntity;
@@ -52,6 +53,12 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
         ButterKnife.bind(this, rootView);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeColors(getResources().getColor(R.color.toolbarColor));
+        refreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshLayout.setRefreshing(true);
+            }
+        });
         initData();
         return rootView;
     }
@@ -65,7 +72,7 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
     }
 
     @Override
-    public void loadData(Object object) {
+    public void loadData(Object object, int type) {
         Log.i(Tag, "enter loadData...");
         if (object != null) {
             Log.i(Tag, "enter object != null...");
@@ -74,6 +81,8 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
                 if (!entity.isError()) {
                     Log.i(Tag, "enter !entity.isError()...");
                     SearchResultEntity[] res = entity.getResults();
+                    if (type == Constants.LOADING_TYPE_INIT)
+                        lists.clear();
                     for (int i = 0; i < res.length; i++) {
                         Log.i(Tag, "enter lists.add(res[" + i + "])...");
                         Document document = Jsoup.parse(res[i].getReadability());
@@ -102,7 +111,11 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
 
     @Override
     public void onRefresh() {
-        lists.clear();
         initData();
+    }
+
+    @Override
+    public void startLoading() {
+        super.startLoading();
     }
 }
