@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.swchalu.gank.Constants;
 import com.example.swchalu.gank.R;
@@ -40,35 +41,47 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
     SwipeRefreshLayout refreshLayout;
     List<SearchResultEntity> lists = new ArrayList<SearchResultEntity>();
     private RecyclerView.LayoutManager mLayoutManager;
-    private AllFragmentPresenterImpl presenter;
+    private AllFragmentPresenterImpl presenter = null;
     private AllRecyclerAdapter mAdapter;
     private View rootView;
+    //当前页码，默认初始值为1，每页10条数据
     private int currentpage = 1;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.i(Tag, "enter onCreateView...");
-        View rootView = inflater.inflate(R.layout.fragment_all, container, false);
+        rootView = inflater.inflate(R.layout.fragment_all, container, false);
         ButterKnife.bind(this, rootView);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeColors(getResources().getColor(R.color.toolbarColor));
-        refreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                refreshLayout.setRefreshing(true);
-            }
-        });
+//        refreshLayout.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                refreshLayout.setRefreshing(true);
+//            }
+//        });
         initData();
         return rootView;
     }
 
     public void initData() {
         Log.i(Tag, "enter initData...");
-        presenter = new AllFragmentPresenterImpl(getActivity());
-        presenter.attachView(this);
+        if (presenter == null) {
+            presenter = new AllFragmentPresenterImpl(getActivity());
+            presenter.attachView(this);
+        }
+        if (mLayoutManager == null) {
+            mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+            recyclerView.setLayoutManager(mLayoutManager);
+            // recyclerView.setItemAnimator(new SlideInLeftAnimator());
+            // recyclerView.getItemAnimator().setMoveDuration(1000);
+        }
+        if (mAdapter == null) {
+            mAdapter = new AllRecyclerAdapter(lists, getActivity());
+            recyclerView.setAdapter(mAdapter);
+        }
         presenter.loadData(1);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
     }
 
     @Override
@@ -97,13 +110,10 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
                         res[i].setPublishedAt(date + " " + time);
                         lists.add(res[i]);
                     }
-                    if (mAdapter == null) {
-                        mAdapter = new AllRecyclerAdapter(lists, getActivity());
-                        recyclerView.setAdapter(mAdapter);
-                    } else {
-                        mAdapter.notifyDataSetChanged();
-                    }
-                    refreshLayout.setRefreshing(false);
+                    mAdapter.notifyDataSetChanged();
+                    hideLoading();
+                } else {
+                    showError(entity.getMsg());
                 }
             }
         }
@@ -116,6 +126,23 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
 
     @Override
     public void startLoading() {
-        super.startLoading();
+        refreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshLayout.setRefreshing(true);
+            }
+        });
+    }
+
+    @Override
+    public void hideLoading() {
+        refreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void showError(String msg) {
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+        hideLoading();
+//        super.showError(msg, onClickListener);
     }
 }

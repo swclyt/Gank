@@ -3,7 +3,7 @@ package com.example.swchalu.gank.entities;
 /**
  * Created by swchalu on 2016/6/23.
  */
-public class SearchResultEntity extends Entity {
+public class SearchResultEntity {
     private String desc;
     private String publishedAt;
     private String readability;
@@ -60,7 +60,11 @@ public class SearchResultEntity extends Entity {
         this.who = who;
     }
 
-    public String getPic() { return pic; }
+    public String getPic() {
+        return pic;
+    }
 
-    public void setPic(String pic) { this.pic = pic; }
+    public void setPic(String pic) {
+        this.pic = pic;
+    }
 }

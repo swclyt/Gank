@@ -1,7 +1,6 @@
 package com.example.swchalu.gank.ui.fragment;
 
 import android.support.v4.app.Fragment;
-import android.view.View;
 
 import com.example.swchalu.gank.ui.view.BaseView;
 
@@ -22,7 +21,7 @@ public class BaseFragment extends Fragment implements BaseView {
     }
 
     @Override
-    public void showError(String msg, View.OnClickListener onClickListener) {
+    public void showError(String msg) {
 
     }
 }

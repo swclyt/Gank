@@ -7,9 +7,11 @@ import com.example.swchalu.gank.api.GankApi;
 import com.example.swchalu.gank.api.GankService;
 import com.example.swchalu.gank.entities.SearchEntity;
 import com.example.swchalu.gank.ui.view.DataView;
+import com.example.swchalu.gank.utils.NetworkUtils;
 
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.schedulers.Schedulers;
 
 /**
@@ -36,8 +38,18 @@ public class AllFragmentPresenterImpl extends BasePresenter<DataView> {
     }
 
     public void loadData(final int page) {
+        if (!NetworkUtils.isNetworkConnected()) {
+            getmBaseView().showError("请检查是否接入网络...");
+            return;
+        }
         GankService.createApi(GankApi.class).getSearch("all", 10, page).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        getmBaseView().startLoading();
+                    }
+                })
                 .subscribe(new Observer<SearchEntity>() {
                                @Override
                                public void onCompleted() {
