@@ -11,7 +11,7 @@ public class BaseFragment extends Fragment implements BaseView {
 
 
     @Override
-    public void startLoading() {
+    public void startLoading(int type) {
 
     }
 

@@ -5,7 +5,7 @@ package com.example.swchalu.gank.ui.view;
  */
 public interface BaseView {
 
-    void startLoading();
+    void startLoading(int type);
 
     void hideLoading();
 

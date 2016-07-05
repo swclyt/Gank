@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Gank");
         setSupportActionBar(toolbar);
 
         AllFragment allFragment = new AllFragment();
@@ -44,12 +45,19 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new TabPagerAdapter(this.getSupportFragmentManager(), fragmentList, titleList);
         mViewPager.setAdapter(mAdapter);
         mTablayout.setupWithViewPager(mViewPager);
+
+
     }
 
+    //    Toast.makeText(MainActivity.this, "clicked the snackbar...", Toast.LENGTH_SHORT).show();
     @Override
     protected void onDestroy() {
         super.onDestroy();
         ButterKnife.unbind(this);
+    }
+
+    public void sync() {
+
     }
 
 }

@@ -2,6 +2,8 @@ package com.example.swchalu.gank.ui.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -39,6 +41,8 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
     RecyclerView recyclerView;
     @Bind(R.id.swipe)
     SwipeRefreshLayout refreshLayout;
+    @Bind(R.id.fab)
+    FloatingActionButton fab;
     List<SearchResultEntity> lists = new ArrayList<SearchResultEntity>();
     private RecyclerView.LayoutManager mLayoutManager;
     private AllFragmentPresenterImpl presenter = null;
@@ -46,6 +50,7 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
     private View rootView;
     //当前页码，默认初始值为1，每页10条数据
     private int currentpage = 1;
+    private boolean FLAG_CAN_LOAD = true;
 
     @Nullable
     @Override
@@ -53,6 +58,36 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
         Log.i(Tag, "enter onCreateView...");
         rootView = inflater.inflate(R.layout.fragment_all, container, false);
         ButterKnife.bind(this, rootView);
+        fab.setVisibility(View.GONE);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mAdapter.getItemCount() > 0) {
+                    recyclerView.smoothScrollToPosition(0);
+                    fab.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (isSlideToBottom(recyclerView) && newState == RecyclerView.SCROLL_STATE_IDLE && FLAG_CAN_LOAD) {
+                    loadMore(currentpage);
+                }
+                if (((LinearLayoutManager) mLayoutManager).findFirstVisibleItemPosition() == 0) {
+//                    Toast.makeText(rootView.getContext(), "第一行显示...", Toast.LENGTH_SHORT).show();
+                    fab.setVisibility(View.GONE);
+                } else {
+                    fab.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeColors(getResources().getColor(R.color.toolbarColor));
 //        refreshLayout.post(new Runnable() {
@@ -81,7 +116,10 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
             mAdapter = new AllRecyclerAdapter(lists, getActivity());
             recyclerView.setAdapter(mAdapter);
         }
-        presenter.loadData(1);
+        if (FLAG_CAN_LOAD) {
+            FLAG_CAN_LOAD = false;
+            presenter.loadData(1);
+        }
     }
 
     @Override
@@ -94,8 +132,9 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
                 if (!entity.isError()) {
                     Log.i(Tag, "enter !entity.isError()...");
                     SearchResultEntity[] res = entity.getResults();
-                    if (type == Constants.LOADING_TYPE_INIT)
+                    if (type == Constants.LOADING_TYPE_INIT) {
                         lists.clear();
+                    }
                     for (int i = 0; i < res.length; i++) {
                         Log.i(Tag, "enter lists.add(res[" + i + "])...");
                         Document document = Jsoup.parse(res[i].getReadability());
@@ -111,11 +150,29 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
                         lists.add(res[i]);
                     }
                     mAdapter.notifyDataSetChanged();
+                    if (type == Constants.LOADING_TYPE_INIT)
+                        currentpage = 1;
+                    else
+                        currentpage++;
                     hideLoading();
                 } else {
                     showError(entity.getMsg());
                 }
             }
+        }
+    }
+
+    public void loadMore(int page) {
+        Log.i(Tag, "enter loadMore...page = " + page);
+        if (presenter == null) {
+            presenter = new AllFragmentPresenterImpl(getActivity());
+            presenter.attachView(this);
+        }
+        int nextpage = page + 1;
+
+        if (FLAG_CAN_LOAD) {
+            FLAG_CAN_LOAD = false;
+            presenter.loadData(nextpage);
         }
     }
 
@@ -125,24 +182,42 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
     }
 
     @Override
-    public void startLoading() {
-        refreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                refreshLayout.setRefreshing(true);
-            }
-        });
+    public void startLoading(int type) {
+        if (type == Constants.LOADING_TYPE_INIT)
+            refreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    refreshLayout.setRefreshing(true);
+                }
+            });
+        else
+            Snackbar.make(fab, "loading...", Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
     public void hideLoading() {
         refreshLayout.setRefreshing(false);
+        FLAG_CAN_LOAD = true;
     }
 
     @Override
     public void showError(String msg) {
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
         hideLoading();
+        FLAG_CAN_LOAD = true;
 //        super.showError(msg, onClickListener);
+    }
+
+    protected boolean isSlideToBottom(RecyclerView recyclerView) {
+        if (recyclerView == null) return false;
+        if (recyclerView.computeVerticalScrollExtent() + recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange())
+            return true;
+        return false;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
     }
 }

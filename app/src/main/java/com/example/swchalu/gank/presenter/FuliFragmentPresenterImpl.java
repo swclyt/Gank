@@ -9,21 +9,22 @@ import com.example.swchalu.gank.entities.SearchEntity;
 import com.example.swchalu.gank.ui.view.DataView;
 import com.example.swchalu.gank.utils.NetworkUtils;
 
+import java.net.URLEncoder;
+
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
 
 /**
- * Created by swchalu on 2016/6/28.
+ * Created by swchalu on 2016/7/5.
  */
-public class AllFragmentPresenterImpl extends BasePresenter<DataView> {
-
-    private final String Tag = "AllFragmentPresenterImpl";
+public class FuliFragmentPresenterImpl extends BasePresenter<DataView> {
+    private final String Tag = "FuliFragmentPresenterImpl";
     private Context context;
     private SearchEntity entity;
 
-    public AllFragmentPresenterImpl(Context context) {
+    public FuliFragmentPresenterImpl(Context context) {
         this.context = context;
     }
 
@@ -42,7 +43,8 @@ public class AllFragmentPresenterImpl extends BasePresenter<DataView> {
             getmBaseView().showError("请检查是否接入网络...");
             return;
         }
-        GankService.createApi(GankApi.class).getSearch("all", 10, page).subscribeOn(Schedulers.io())
+        String category = URLEncoder.encode("福利");
+        GankService.createApi(GankApi.class).getSearch(category, 10, page).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(new Action0() {
                     @Override
@@ -51,20 +53,21 @@ public class AllFragmentPresenterImpl extends BasePresenter<DataView> {
                     }
                 })
                 .subscribe(new Observer<SearchEntity>() {
-                               @Override
-                               public void onCompleted() {
-                               }
+                    @Override
+                    public void onCompleted() {
 
-                               @Override
-                               public void onError(Throwable e) {
-                               }
+                    }
 
-                               @Override
-                               public void onNext(SearchEntity searchEntity) {
-                                   entity = searchEntity;
-                                   getmBaseView().loadData(entity, page == 1 ? Constants.LOADING_TYPE_INIT : Constants.LOADING_TYPE_PAGE);
-                               }
-                           }
-                );
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(SearchEntity searchEntity) {
+                        entity = searchEntity;
+                        getmBaseView().loadData(entity, page == 1 ? Constants.LOADING_TYPE_INIT : Constants.LOADING_TYPE_PAGE);
+                    }
+                });
     }
 }
