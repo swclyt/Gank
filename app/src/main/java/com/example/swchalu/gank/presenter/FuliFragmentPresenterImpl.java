@@ -9,8 +9,6 @@ import com.example.swchalu.gank.entities.SearchEntity;
 import com.example.swchalu.gank.ui.view.DataView;
 import com.example.swchalu.gank.utils.NetworkUtils;
 
-import java.net.URLEncoder;
-
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -43,7 +41,8 @@ public class FuliFragmentPresenterImpl extends BasePresenter<DataView> {
             getmBaseView().showError("请检查是否接入网络...");
             return;
         }
-        String category = URLEncoder.encode("福利");
+//        String category = URLEncoder.encode("福利");
+        String category = "福利";
         GankService.createApi(GankApi.class).getSearch(category, 10, page).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(new Action0() {

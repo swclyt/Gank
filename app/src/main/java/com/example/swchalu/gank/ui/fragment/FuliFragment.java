@@ -3,14 +3,22 @@ package com.example.swchalu.gank.ui.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.example.swchalu.gank.Constants;
 import com.example.swchalu.gank.R;
+import com.example.swchalu.gank.entities.SearchEntity;
 import com.example.swchalu.gank.entities.SearchResultEntity;
+import com.example.swchalu.gank.presenter.FuliFragmentPresenterImpl;
+import com.example.swchalu.gank.ui.adapter.FuliRecyclerAdapter;
 import com.example.swchalu.gank.ui.view.DataView;
 
 import java.util.ArrayList;
@@ -35,6 +43,8 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
     private RecyclerView.LayoutManager mLayoutManager;
     private View rootView;
     //当前页码，默认初始值为1，每页10条数据
+    private FuliFragmentPresenterImpl presenter = null;
+    private FuliRecyclerAdapter mAdapter;
     private int currentpage = 1;
     private boolean FLAG_CAN_LOAD = true;
 
@@ -45,36 +55,144 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
         ButterKnife.bind(this, rootView);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeColors(getResources().getColor(R.color.toolbarColor));
+        fab.setVisibility(View.GONE);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mAdapter.getItemCount() > 0) {
+                    recyclerView.smoothScrollToPosition(0);
+                    fab.setVisibility(View.GONE);
+                }
+            }
+        });
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (isSlideToBottom(recyclerView) && newState == RecyclerView.SCROLL_STATE_IDLE && FLAG_CAN_LOAD) {
+                    loadMore(currentpage);
+                }
+                if (((LinearLayoutManager) mLayoutManager).findFirstVisibleItemPosition() == 0) {
+                    fab.setVisibility(View.GONE);
+                } else {
+                    fab.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        initData();
         return rootView;
     }
 
-    @Override
-    public void loadData(Object o, int type) {
+    public void initData() {
+        Log.i(Tag, "enter initData...");
+        if (presenter == null) {
+            presenter = new FuliFragmentPresenterImpl(getActivity());
+            presenter.attachView(this);
+        }
+        if (mLayoutManager == null) {
+            mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+            recyclerView.setLayoutManager(mLayoutManager);
+            // recyclerView.setItemAnimator(new SlideInLeftAnimator());
+            // recyclerView.getItemAnimator().setMoveDuration(1000);
+        }
+        if (mAdapter == null) {
+            mAdapter = new FuliRecyclerAdapter(lists, getActivity());
+            recyclerView.setAdapter(mAdapter);
+        }
+        if (FLAG_CAN_LOAD) {
+            FLAG_CAN_LOAD = false;
+            presenter.loadData(1);
+        }
+    }
 
+    @Override
+    public void loadData(Object object, int type) {
+        Log.i(Tag, "enter loadData...");
+        if (object != null) {
+            Log.i(Tag, "enter object != null...");
+            if (object instanceof SearchEntity) {
+                SearchEntity entity = (SearchEntity) object;
+                if (!entity.isError()) {
+                    Log.i(Tag, "enter !entity.isError()...");
+                    SearchResultEntity[] res = entity.getResults();
+                    if (type == Constants.LOADING_TYPE_INIT) {
+                        lists.clear();
+                    }
+                    for (int i = 0; i < res.length; i++) {
+                        Log.i(Tag, "enter lists.add(res[" + i + "])...");
+                        String date = res[i].getPublishedAt().split("T")[0];
+                        String time = res[i].getPublishedAt().split("T")[1];
+                        time = time.substring(0, 8);
+                        res[i].setPublishedAt(date + " " + time);
+                        lists.add(res[i]);
+                    }
+                    mAdapter.notifyDataSetChanged();
+                    if (type == Constants.LOADING_TYPE_INIT)
+                        currentpage = 1;
+                    else
+                        currentpage++;
+                    hideLoading();
+                } else {
+                    showError(entity.getMsg());
+                }
+            }
+        }
+    }
+
+    public void loadMore(int page) {
+        Log.i(Tag, "enter loadMore...page = " + page);
+        if (presenter == null) {
+            presenter = new FuliFragmentPresenterImpl(getActivity());
+            presenter.attachView(this);
+        }
+        int nextpage = page + 1;
+
+        if (FLAG_CAN_LOAD) {
+            FLAG_CAN_LOAD = false;
+            presenter.loadData(nextpage);
+        }
     }
 
     @Override
     public void startLoading(int type) {
-        super.startLoading(type);
+        if (type == Constants.LOADING_TYPE_INIT)
+            refreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    refreshLayout.setRefreshing(true);
+                }
+            });
+        else
+            Snackbar.make(fab, "loading...", Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
     public void hideLoading() {
-        super.hideLoading();
+        refreshLayout.setRefreshing(false);
+        FLAG_CAN_LOAD = true;
     }
 
     @Override
     public void showError(String msg) {
-        super.showError(msg);
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+        hideLoading();
+        FLAG_CAN_LOAD = true;
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        ButterKnife.unbind(this);
     }
 
     @Override
     public void onRefresh() {
+        initData();
+    }
 
+    protected boolean isSlideToBottom(RecyclerView recyclerView) {
+        if (recyclerView == null) return false;
+        if (recyclerView.computeVerticalScrollExtent() + recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange())
+            return true;
+        return false;
     }
 }

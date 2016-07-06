@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import com.example.swchalu.gank.R;
 import com.example.swchalu.gank.ui.adapter.TabPagerAdapter;
 import com.example.swchalu.gank.ui.fragment.AllFragment;
+import com.example.swchalu.gank.ui.fragment.FuliFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,26 +39,21 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         AllFragment allFragment = new AllFragment();
+        FuliFragment fuliFragment = new FuliFragment();
         fragmentList = new ArrayList<>();
         fragmentList.add(allFragment);
+        fragmentList.add(fuliFragment);
         titleList = new ArrayList<>();
         titleList.add("全部");
+        titleList.add("福利");
         mAdapter = new TabPagerAdapter(this.getSupportFragmentManager(), fragmentList, titleList);
         mViewPager.setAdapter(mAdapter);
         mTablayout.setupWithViewPager(mViewPager);
-
-
     }
 
-    //    Toast.makeText(MainActivity.this, "clicked the snackbar...", Toast.LENGTH_SHORT).show();
     @Override
     protected void onDestroy() {
         super.onDestroy();
         ButterKnife.unbind(this);
     }
-
-    public void sync() {
-
-    }
-
 }
