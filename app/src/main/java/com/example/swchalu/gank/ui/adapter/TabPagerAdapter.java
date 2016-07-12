@@ -20,6 +20,8 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
         this.titleList = titleList;
     }
 
+
+
     @Override
     public int getCount() {
         return fragmentList.size();

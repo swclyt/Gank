@@ -17,7 +17,7 @@ import com.example.swchalu.gank.Constants;
 import com.example.swchalu.gank.R;
 import com.example.swchalu.gank.entities.SearchEntity;
 import com.example.swchalu.gank.entities.SearchResultEntity;
-import com.example.swchalu.gank.presenter.AllFragmentPresenterImpl;
+import com.example.swchalu.gank.presenter.AndroidFragmentPresenterImpl;
 import com.example.swchalu.gank.ui.adapter.AllRecyclerAdapter;
 import com.example.swchalu.gank.ui.view.DataView;
 
@@ -32,11 +32,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 /**
- * Created by swchalu on 2016/6/23.
+ * Created by swchalu on 2016/7/12.
  */
-public class AllFragment extends BaseFragment implements DataView, SwipeRefreshLayout.OnRefreshListener {
+public class AndroidFragment extends BaseFragment implements DataView, SwipeRefreshLayout.OnRefreshListener {
 
-    private final String Tag = "AllFragment";
+    private final String Tag = "AndroidFragment";
     @Bind(R.id.recyclerview)
     RecyclerView recyclerView;
     @Bind(R.id.swipe)
@@ -45,8 +45,9 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
     FloatingActionButton fab;
     List<SearchResultEntity> lists = new ArrayList<SearchResultEntity>();
     private RecyclerView.LayoutManager mLayoutManager;
-    private AllFragmentPresenterImpl presenter = null;
+    private AndroidFragmentPresenterImpl presenter = null;
     private AllRecyclerAdapter mAdapter;
+
     private View rootView;
     //当前页码，默认初始值为1，每页10条数据
     private int currentpage = 1;
@@ -54,7 +55,7 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.i(Tag, "enter onCreateView...");
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_all, container, false);
@@ -80,7 +81,6 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
                     loadMore(currentpage);
                 }
                 if (((LinearLayoutManager) mLayoutManager).findFirstVisibleItemPosition() == 0) {
-//                    Toast.makeText(rootView.getContext(), "第一行显示...", Toast.LENGTH_SHORT).show();
                     fab.setVisibility(View.GONE);
                 } else {
                     fab.setVisibility(View.VISIBLE);
@@ -94,12 +94,6 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
         });
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeColors(getResources().getColor(R.color.toolbarColor));
-//        refreshLayout.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                refreshLayout.setRefreshing(true);
-//            }
-//        });
         initData();
         return rootView;
     }
@@ -107,7 +101,7 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
     public void initData() {
         Log.i(Tag, "enter initData...");
         if (presenter == null) {
-            presenter = new AllFragmentPresenterImpl(getActivity());
+            presenter = new AndroidFragmentPresenterImpl(getActivity());
             presenter.attachView(this);
         }
         if (mLayoutManager == null) {
@@ -169,7 +163,7 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
     public void loadMore(int page) {
         Log.i(Tag, "enter loadMore...page = " + page);
         if (presenter == null) {
-            presenter = new AllFragmentPresenterImpl(getActivity());
+            presenter = new AndroidFragmentPresenterImpl(getActivity());
             presenter.attachView(this);
         }
         int nextpage = page + 1;
@@ -209,7 +203,6 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
         hideLoading();
         FLAG_CAN_LOAD = true;
-//        super.showError(msg, onClickListener);
     }
 
     protected boolean isSlideToBottom(RecyclerView recyclerView) {
@@ -220,13 +213,13 @@ public class AllFragment extends BaseFragment implements DataView, SwipeRefreshL
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.unbind(this);
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
     }
 }

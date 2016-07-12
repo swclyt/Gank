@@ -49,6 +49,7 @@ public class FuliRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (items.size() > 0) {
             mHolder.tv_who.setText(items.get(position).getWho());
             mHolder.tv_publishedAt.setText(items.get(position).getPublishedAt());
+            mHolder.tv_desc.setText(items.get(position).getDesc());
             if (items.get(position).getUrl() != null)
                 App.getPicasso().with(context).load(items.get(position).getUrl()).into(mHolder.iv_show);
             mHolder.ll_item.setOnClickListener(new View.OnClickListener() {
@@ -78,6 +79,8 @@ public class FuliRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ImageView iv_show;
         @Bind(R.id.ll_item)
         LinearLayout ll_item;
+        @Bind(R.id.tv_desc)
+        TextView tv_desc;
 
         public FuliHoder(View itemView) {
             super(itemView);

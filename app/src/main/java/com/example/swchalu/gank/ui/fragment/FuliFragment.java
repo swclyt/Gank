@@ -51,7 +51,9 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_fuli, container, false);
+        if (rootView == null) {
+            rootView = inflater.inflate(R.layout.fragment_fuli, container, false);
+        }
         ButterKnife.bind(this, rootView);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeColors(getResources().getColor(R.color.toolbarColor));
@@ -60,6 +62,8 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
             @Override
             public void onClick(View view) {
                 if (mAdapter.getItemCount() > 0) {
+                    if (((LinearLayoutManager) mLayoutManager).findFirstVisibleItemPosition() > 10)
+                        recyclerView.scrollToPosition(10);
                     recyclerView.smoothScrollToPosition(0);
                     fab.setVisibility(View.GONE);
                 }
@@ -176,6 +180,11 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
         hideLoading();
         FLAG_CAN_LOAD = true;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
