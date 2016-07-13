@@ -51,6 +51,7 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.i(Tag, "enter onCreateView...");
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_fuli, container, false);
         }
@@ -82,12 +83,14 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
                 }
             }
         });
-        initData();
+        initView();
+        if (savedInstanceState == null)
+            initData();
         return rootView;
     }
 
-    public void initData() {
-        Log.i(Tag, "enter initData...");
+    public void initView() {
+        Log.i(Tag, "enter initView...");
         if (presenter == null) {
             presenter = new FuliFragmentPresenterImpl(getActivity());
             presenter.attachView(this);
@@ -102,6 +105,10 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
             mAdapter = new FuliRecyclerAdapter(lists, getActivity());
             recyclerView.setAdapter(mAdapter);
         }
+    }
+
+    public void initData() {
+        Log.i(Tag, "enter initData...");
         if (FLAG_CAN_LOAD) {
             FLAG_CAN_LOAD = false;
             presenter.loadData(1);
@@ -130,6 +137,7 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
                         lists.add(res[i]);
                     }
                     mAdapter.notifyDataSetChanged();
+                    Log.i(Tag, "enter mAdapter.notifyDataSetChanged()...");
                     if (type == Constants.LOADING_TYPE_INIT)
                         currentpage = 1;
                     else
@@ -158,6 +166,7 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
 
     @Override
     public void startLoading(int type) {
+        Log.i(Tag, "enter startLoading...");
         if (type == Constants.LOADING_TYPE_INIT)
             refreshLayout.post(new Runnable() {
                 @Override
@@ -171,15 +180,47 @@ public class FuliFragment extends BaseFragment implements DataView, SwipeRefresh
 
     @Override
     public void hideLoading() {
+        Log.i(Tag, "enter hideLoading...");
         refreshLayout.setRefreshing(false);
         FLAG_CAN_LOAD = true;
     }
 
     @Override
     public void showError(String msg) {
+        Log.i(Tag, "enter showError...");
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
         hideLoading();
         FLAG_CAN_LOAD = true;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Log.i(Tag, "onSaveInstanceState...outState = " + outState);
+        super.onSaveInstanceState(outState);
+        if (lists.size() > 0) {
+            outState.putParcelableArrayList("lists", (ArrayList) lists);
+            outState.putInt("position", ((LinearLayoutManager) mLayoutManager).findFirstVisibleItemPosition());
+        }
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        Log.i(Tag, "onViewStateRestored...savedInstanceState = " + (savedInstanceState == null));
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            List<SearchResultEntity> savedList = savedInstanceState.getParcelableArrayList("lists");
+            if (savedList.size() > 0) {
+                lists.clear();
+                for (SearchResultEntity entity : savedList) {
+                    lists.add(entity);
+                }
+                Log.i(Tag, "onViewStateRestored...lists.size() = " + lists.size());
+                mAdapter.notifyDataSetChanged();
+                Log.i(Tag, "onViewStateRestored...notifyDataSetChanged()... mAdapter.getItemCount():" + mAdapter.getItemCount());
+                recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
+                Log.i(Tag, "onViewStateRestored...position = " + savedInstanceState.getInt("position"));
+            }
+        }
     }
 
     @Override

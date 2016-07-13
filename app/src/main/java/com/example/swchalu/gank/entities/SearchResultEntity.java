@@ -1,9 +1,23 @@
 package com.example.swchalu.gank.entities;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by swchalu on 2016/6/23.
  */
-public class SearchResultEntity {
+public class SearchResultEntity implements Parcelable {
+    public static final Creator<SearchResultEntity> CREATOR = new Creator<SearchResultEntity>() {
+        @Override
+        public SearchResultEntity createFromParcel(Parcel in) {
+            return new SearchResultEntity(in);
+        }
+
+        @Override
+        public SearchResultEntity[] newArray(int size) {
+            return new SearchResultEntity[size];
+        }
+    };
     private String desc;
     private String publishedAt;
     private String readability;
@@ -11,6 +25,16 @@ public class SearchResultEntity {
     private String url;
     private String who;
     private String pic;
+
+    protected SearchResultEntity(Parcel in) {
+        desc = in.readString();
+        publishedAt = in.readString();
+        readability = in.readString();
+        type = in.readString();
+        url = in.readString();
+        who = in.readString();
+        pic = in.readString();
+    }
 
     public String getDesc() {
         return desc;
@@ -66,5 +90,21 @@ public class SearchResultEntity {
 
     public void setPic(String pic) {
         this.pic = pic;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(desc);
+        parcel.writeString(publishedAt);
+        parcel.writeString(readability);
+        parcel.writeString(type);
+        parcel.writeString(url);
+        parcel.writeString(who);
+        parcel.writeString(pic);
     }
 }

@@ -41,5 +41,5 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile 'com.squareup.okio:okio:1.8.0'
 
-    compile 'jp.wasabeef:recyclerview-animators:2.2.3'
+   // compile 'jp.wasabeef:recyclerview-animators:2.2.3'
 }

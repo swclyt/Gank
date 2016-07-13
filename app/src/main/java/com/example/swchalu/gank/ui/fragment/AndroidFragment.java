@@ -94,12 +94,14 @@ public class AndroidFragment extends BaseFragment implements DataView, SwipeRefr
         });
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeColors(getResources().getColor(R.color.toolbarColor));
-        initData();
+        initView();
+        if (savedInstanceState == null)
+            initData();
         return rootView;
     }
 
-    public void initData() {
-        Log.i(Tag, "enter initData...");
+    public void initView() {
+        Log.i(Tag, "enter initView...");
         if (presenter == null) {
             presenter = new AndroidFragmentPresenterImpl(getActivity());
             presenter.attachView(this);
@@ -114,6 +116,10 @@ public class AndroidFragment extends BaseFragment implements DataView, SwipeRefr
             mAdapter = new AllRecyclerAdapter(lists, getActivity());
             recyclerView.setAdapter(mAdapter);
         }
+    }
+
+    public void initData() {
+        Log.i(Tag, "enter initData...");
         if (FLAG_CAN_LOAD) {
             FLAG_CAN_LOAD = false;
             presenter.loadData(1);
@@ -138,7 +144,7 @@ public class AndroidFragment extends BaseFragment implements DataView, SwipeRefr
                         Document document = Jsoup.parse(res[i].getReadability());
                         Elements es = document.getElementsByTag("img");
                         if (es.size() > 0) {
-                            Log.i(Tag, "res[" + i + "].getReadability()的img url = " + es.get(0).absUrl("src"));
+                            //       Log.i(Tag, "res[" + i + "].getReadability()的img url = " + es.get(0).absUrl("src"));
                             res[i].setPic(es.get(0).absUrl("src"));
                         }
                         String date = res[i].getPublishedAt().split("T")[0];
@@ -210,6 +216,37 @@ public class AndroidFragment extends BaseFragment implements DataView, SwipeRefr
         if (recyclerView.computeVerticalScrollExtent() + recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange())
             return true;
         return false;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Log.i(Tag, "onSaveInstanceState...outState = " + outState);
+        super.onSaveInstanceState(outState);
+
+        if (lists.size() > 0) {
+            outState.putParcelableArrayList("lists", (ArrayList) lists);
+            outState.putInt("position", ((LinearLayoutManager) mLayoutManager).findFirstVisibleItemPosition());
+        }
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        Log.i(Tag, "onViewStateRestored...savedInstanceState = " + (savedInstanceState == null));
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            List<SearchResultEntity> savedList = savedInstanceState.getParcelableArrayList("lists");
+            if (savedList.size() > 0) {
+                lists.clear();
+                for (SearchResultEntity entity : savedList) {
+                    lists.add(entity);
+                }
+                Log.i(Tag, "onViewStateRestored...lists.size() = " + lists.size());
+                mAdapter.notifyDataSetChanged();
+                Log.i(Tag, "onViewStateRestored...notifyDataSetChanged()... mAdapter.getItemCount():" + mAdapter.getItemCount());
+                recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
+                Log.i(Tag, "onViewStateRestored...position = " + savedInstanceState.getInt("position"));
+            }
+        }
     }
 
     @Override

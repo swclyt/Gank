@@ -2,6 +2,7 @@ package com.example.swchalu.gank.ui.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,7 +54,9 @@ public class AllRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             mHolder.tv_publishedAt.setText(items.get(position).getPublishedAt());
             if (items.get(position).getPic() != null) {
                 mHolder.iv_show.setVisibility(View.VISIBLE);
-                App.getPicasso().with(context).load(items.get(position).getPic()).into(mHolder.iv_show);
+                App.getPicasso().with(context).load(items.get(position).getPic())
+                        .placeholder(ContextCompat.getDrawable(context, R.drawable.ic_image_loading))
+                        .into(mHolder.iv_show);
             }
             mHolder.ll_item.setOnClickListener(new View.OnClickListener() {
                 @Override
