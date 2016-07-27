@@ -2,6 +2,7 @@ package com.example.swchalu.gank;
 
 import android.app.Application;
 
+import com.example.swchalu.gank.utils.MyDownLoadManager;
 import com.example.swchalu.gank.utils.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
@@ -12,6 +13,7 @@ import okhttp3.OkHttpClient;
  */
 public class App extends Application {
     public static Picasso mPicasso;
+    public static MyDownLoadManager myDownLoadManager = new MyDownLoadManager();
     private static App instace;
 
     public static App getInstace() {
@@ -20,6 +22,10 @@ public class App extends Application {
 
     public static Picasso getPicasso() {
         return mPicasso;
+    }
+
+    public static MyDownLoadManager getDownLoadManager() {
+        return myDownLoadManager;
     }
 
     @Override
